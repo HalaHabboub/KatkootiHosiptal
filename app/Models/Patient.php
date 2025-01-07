@@ -21,4 +21,8 @@ class Patient extends Authenticatable
         'current_medications',
         'allergies'
     ];
+
+    protected $primaryKey = 'patient_id';  // Specify the custom primary key
+    public $incrementing = true;  // If auto-incrementing
+    protected $keyType = 'int';   // Type of primary key
 }
