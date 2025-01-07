@@ -40,6 +40,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'patient' => [
+            'driver' => 'session',
+            'provider' => 'patients',
+        ],
+        'doctor' => [
+            'driver' => 'session',
+            'provider' => 'doctors',
+        ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -62,13 +74,20 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\User::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'patients' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Patient::class,
+        ],
+        'doctors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Doctor::class,
+        ],
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ],
     ],
 
     /*
@@ -97,6 +116,24 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        'patients' => [
+            'provider' => 'patients',
+            'table' => 'patient_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'doctors' => [
+            'provider' => 'doctors',
+            'table' => 'doctor_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'admins' => [
+            'provider' => 'admins',
+            'table' => 'admin_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
 
     /*
@@ -111,5 +148,6 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+
 
 ];
