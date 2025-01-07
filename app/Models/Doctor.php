@@ -18,4 +18,8 @@ class Doctor extends Authenticatable
         'qualification',
         'status'
     ];
+    protected $primaryKey = 'doctor_id';  // or 'admin_id' for Admin model
+    public $incrementing = true;  // If the primary key auto-increments
+    protected $keyType = 'int';   // Type of primary key (int for auto-incrementing)
+
 }

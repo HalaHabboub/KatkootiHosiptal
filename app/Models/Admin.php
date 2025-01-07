@@ -16,4 +16,7 @@ class Admin extends Authenticatable
         'password',
         'role'
     ];
+    protected $primaryKey = 'admin_id';  // Specify the custom primary key
+    public $incrementing = true;
+    protected $keyType = 'int';
 }

@@ -66,7 +66,7 @@
         </div>
 
         <!-- Login Form -->
-        <form method="POST" action="{{ route('login') }}" class="login-form">
+        <form method="POST" action="{{ route('login.post') }}" class="login-form">
             @csrf
             <div class="form-group">
                 <label for="user_type">User Type</label>

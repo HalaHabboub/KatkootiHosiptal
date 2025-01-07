@@ -33,7 +33,7 @@ class LoginController extends Controller
         if (Auth::guard($guard)->attempt($credentials)) {
             switch ($guard) {
                 case 'patient':
-                    return redirect()->route('patient.dashboard');
+                    return redirect()->route('patient');
                 case 'doctor':
                     return redirect()->route('doctor.dashboard');
                 case 'admin':
@@ -42,6 +42,12 @@ class LoginController extends Controller
         }
 
         return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+    }
+
+    // Show login form
+    public function showLoginForm()
+    {
+        return view('auth.login');
     }
 
     public function logout(Request $request)
