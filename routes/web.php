@@ -63,18 +63,12 @@ Route::middleware(['web'])->group(function () {
             Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         });
 
-        // Remove or comment out this route
-        // Route::get('/index', function () {
-        //     return view('index');
-        // })->name('home');
 
         Route::get('/about', function () {
             return view('about');
         })->name('about');
 
-        Route::get('/viewAllDoctors', function () {
-            return view('viewAllDoctors');
-        })->name('doctors.index');
+        Route::get('/viewAllDoctors', [DoctorController::class, 'getAllDoctors'])->name('doctors.index');
 
         Route::get('/patientProfile', [PatientController::class, 'show'])->name('profile');
 
