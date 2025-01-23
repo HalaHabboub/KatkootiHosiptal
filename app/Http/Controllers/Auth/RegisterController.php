@@ -3,33 +3,34 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Patient;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
+    protected $redirectTo = '/complete-registration';
+
     public function register(Request $request)
     {
-        // Validate the form input
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:patients,email',
-            'password' => 'required|string|min:8|confirmed',
+            'email' => 'required|string|email|max:255|unique:patients',
+            'password' => 'required|string|confirmed|min:8',
         ]);
 
-        // Create the patient
         $patient = Patient::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        // Automatically log the patient in
+        event(new Registered($patient));
+
         Auth::guard('patient')->login($patient);
 
-        // Redirect to the patient dashboard
-        return redirect()->route('patient.dashboard');
+        return redirect($this->redirectTo);
     }
 }

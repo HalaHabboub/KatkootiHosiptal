@@ -32,6 +32,8 @@ Route::middleware(['web'])->group(function () {
 
         // Handle login form submission (POST request)
         Route::post('/auth/login', [LoginController::class, 'login'])->name('login.post');
+
+        // Update the register route to use our custom controller
         Route::post('/register', [RegisterController::class, 'register'])->name('register');
 
         // Update the logout route - remove middleware
@@ -81,6 +83,14 @@ Route::middleware(['web'])->group(function () {
             $routes = Route::getRoutes()->getRoutesByName();
             dd(isset($routes['logout']), $routes['logout'] ?? 'Logout route not found');
         });
+
+        // Make route accessible without auth middleware initially
+        Route::get('/complete-registration', [PatientController::class, 'completeRegistration'])
+            ->name('profile.complete');
+
+        Route::post('/store-profile', [PatientController::class, 'storeProfile'])
+            ->name('profile.store')
+            ->middleware('auth:patient');
 
         Auth::routes();
     });
