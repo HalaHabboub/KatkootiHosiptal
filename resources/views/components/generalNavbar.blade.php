@@ -21,25 +21,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('doctors.index') }}">View All Doctors</a>
                 </li>
-
-                @auth('patient')
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('profile') }}">My Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('appointments') }}">Appointments</a>
-                </li>
-                <li class="nav-item">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-danger ml-lg-3">Logout</button>
-                    </form>
-                </li>
-                @else
                 <li class="nav-item">
                     <a class="btn btn-primary ml-lg-3" href="{{ route('login') }}">Login / Register</a>
                 </li>
-                @endauth
             </ul>
         </div>
     </div>

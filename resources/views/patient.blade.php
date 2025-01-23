@@ -3,14 +3,25 @@
 @section('title', 'Katkooti Children\'s Hospital')
 
 @section('content')
+@include('components.patientNavbar')
 
 <!-- Hero Section -->
 <div class="page-hero bg-image overlay-dark" style="background-image: url({{ asset('assets/img/bg_image_1.jpg') }});">
     <div class="hero-section">
         <div class="container text-center wow zoomIn">
             <span class="subhead">Compassionate healthcare for your little ones</span>
-            <h1 class="display-4">Gentle Healing</h1>
+            <h1 class="display-4">
+                @auth('patient')
+                Welcome, {{ Auth::guard('patient')->user()->name }}
+                @else
+                Welcome to Katkooti Children's Hospital
+                @endauth
+            </h1>
+            @auth('patient')
             <a href="#" class="btn btn-primary">Book your appointment</a>
+            @else
+            <a href="{{ route('login') }}" class="btn btn-primary">Login to Book Appointment</a>
+            @endauth
         </div>
     </div>
 </div>

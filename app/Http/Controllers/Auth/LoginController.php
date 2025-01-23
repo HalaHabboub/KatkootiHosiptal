@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
@@ -13,8 +14,8 @@ class LoginController extends Controller
 
     public function __construct()
     {
+        // Remove all middleware restrictions
         $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
     }
 
     public function login(Request $request)
@@ -52,7 +53,14 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        // Logout from all guards
         Auth::logout();
+
+        // Clear the session
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect to patient view
         return redirect('/');
     }
 }

@@ -13,10 +13,9 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/maicons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/animate/animate.css') }}">
@@ -26,8 +25,8 @@
 
 <body class="font-sans antialiased">
     <div id="app">
-        @include('components.patientnavbar')
-
+        @include('components.patientNavbar')
+        <!-- Ensure the correct path to the patient's navbar -->
         <main class="py-4">
             @yield('content')
         </main>
@@ -38,6 +37,16 @@
     @stack('modals')
 
     @livewireScripts
+
+    <script>
+        // Prevent back button access to protected pages after logout
+        (function () {
+            window.history.pushState(null, "", window.location.href);
+            window.onpopstate = function () {
+                window.history.pushState(null, "", window.location.href);
+            };
+        })();
+    </script>
 </body>
 
 </html>
