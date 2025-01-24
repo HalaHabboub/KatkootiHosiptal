@@ -50,6 +50,7 @@ Route::middleware(['web'])->group(function () {
             Route::get('/patient', function () {
                 return view('patient');
             })->name('patient');
+            Route::put('/profile/update', [PatientController::class, 'updateProfile'])->name('profile.update');
         });
 
         // Doctor Dashboard
@@ -72,7 +73,9 @@ Route::middleware(['web'])->group(function () {
 
         Route::get('/viewAllDoctors', [DoctorController::class, 'getAllDoctors'])->name('doctors.index');
 
-        Route::get('/patientProfile', [PatientController::class, 'show'])->name('profile');
+        Route::get('/patientProfile', function () {
+            return view('profile.update-profile-information-form');
+        })->name('profile')->middleware('auth:patient');
 
         Route::get('/patientAppointments', [PatientController::class, 'appointments'])->name('appointments');
 
@@ -91,6 +94,7 @@ Route::middleware(['web'])->group(function () {
         Route::post('/store-profile', [PatientController::class, 'storeProfile'])
             ->name('profile.store')
             ->middleware('auth:patient');
+
 
         Auth::routes();
     });

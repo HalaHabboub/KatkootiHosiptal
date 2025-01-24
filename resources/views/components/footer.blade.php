@@ -3,7 +3,7 @@
         <div class="row py-4">
             <!-- Company Info -->
             <div class="col-sm-6 col-lg-4 mb-4">
-                <h5 class="text-primary mb-3">OneHealth</h5>
+                <h5 class="text-primary mb-3">Katkooti</h5>
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="#" class="text-white">About Us</a></li>
                     <li class="mb-2"><a href="#" class="text-white">Privacy Policy</a></li>

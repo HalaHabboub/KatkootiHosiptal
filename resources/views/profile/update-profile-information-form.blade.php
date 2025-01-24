@@ -1,95 +1,110 @@
-<x-form-section submit="updateProfileInformation">
-    <x-slot name="title">
-        {{ __('Profile Information') }}
-    </x-slot>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Profile - Katkooti Hospital</title>
+    
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}">
+    
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .card-header {
+            background: linear-gradient(45deg, #00d9a6, #00aeff);
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #00d9a6, #00aeff);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    @include('components.patientNavbar')
+    
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Update Profile Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
 
-    <x-slot name="description">
-        {{ __('Update your account\'s profile information and email address.') }}
-    </x-slot>
+                            <div class="form-group mb-3">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ auth()->user()->name ?? old('name') }}" required>
+                            </div>
 
-    <x-slot name="form">
-        <!-- Profile Photo -->
-        @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-            <div x-data="{photoName: null, photoPreview: null}" class="col-span-6 sm:col-span-4">
-                <!-- Profile Photo File Input -->
-                <input type="file" id="photo" class="hidden"
-                            wire:model.live="photo"
-                            x-ref="photo"
-                            x-on:change="
-                                    photoName = $refs.photo.files[0].name;
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
-                                        photoPreview = e.target.result;
-                                    };
-                                    reader.readAsDataURL($refs.photo.files[0]);
-                            " />
+                            <div class="form-group mb-3">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ auth()->user()->email ?? old('email') }}" required>
+                            </div>
 
-                <x-label for="photo" value="{{ __('Photo') }}" />
+                            <div class="form-group mb-3">
+                                <label for="phone">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="{{ auth()->user()->phone ?? old('phone') }}" required>
+                            </div>
 
-                <!-- Current Profile Photo -->
-                <div class="mt-2" x-show="! photoPreview">
-                    <img src="{{ $this->user->profile_photo_url }}" alt="{{ $this->user->name }}" class="rounded-full size-20 object-cover">
+                            <div class="form-group mb-3">
+                                <label for="date_of_birth">Date of Birth</label>
+                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ auth()->user()->date_of_birth }}">
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="gender">Gender</label>
+                                <select class="form-control" id="gender" name="gender">
+                                    <option value="male" {{ auth()->user()->gender == 'male' ? 'selected' : '' }}>Male</option>
+                                    <option value="female" {{ auth()->user()->gender == 'female' ? 'selected' : '' }}>Female</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="blood_group">Blood Group</label>
+                                <select class="form-control" id="blood_group" name="blood_group">
+                                    @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $group)
+                                        <option value="{{ $group }}" {{ auth()->user()->blood_group == $group ? 'selected' : '' }}>
+                                            {{ $group }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="existing_conditions">Existing Medical Conditions</label>
+                                <textarea class="form-control" id="existing_conditions" name="existing_conditions" rows="3">{{ auth()->user()->existing_conditions }}</textarea>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="current_medications">Current Medications</label>
+                                <textarea class="form-control" id="current_medications" name="current_medications" rows="3">{{ auth()->user()->current_medications }}</textarea>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="allergies">Allergies</label>
+                                <textarea class="form-control" id="allergies" name="allergies" rows="3">{{ auth()->user()->allergies }}</textarea>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                <!-- New Profile Photo Preview -->
-                <div class="mt-2" x-show="photoPreview" style="display: none;">
-                    <span class="block rounded-full size-20 bg-cover bg-no-repeat bg-center"
-                          x-bind:style="'background-image: url(\'' + photoPreview + '\');'">
-                    </span>
-                </div>
-
-                <x-secondary-button class="mt-2 me-2" type="button" x-on:click.prevent="$refs.photo.click()">
-                    {{ __('Select A New Photo') }}
-                </x-secondary-button>
-
-                @if ($this->user->profile_photo_path)
-                    <x-secondary-button type="button" class="mt-2" wire:click="deleteProfilePhoto">
-                        {{ __('Remove Photo') }}
-                    </x-secondary-button>
-                @endif
-
-                <x-input-error for="photo" class="mt-2" />
             </div>
-        @endif
-
-        <!-- Name -->
-        <div class="col-span-6 sm:col-span-4">
-            <x-label for="name" value="{{ __('Name') }}" />
-            <x-input id="name" type="text" class="mt-1 block w-full" wire:model="state.name" required autocomplete="name" />
-            <x-input-error for="name" class="mt-2" />
         </div>
+    </div>
 
-        <!-- Email -->
-        <div class="col-span-6 sm:col-span-4">
-            <x-label for="email" value="{{ __('Email') }}" />
-            <x-input id="email" type="email" class="mt-1 block w-full" wire:model="state.email" required autocomplete="username" />
-            <x-input-error for="email" class="mt-2" />
-
-            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && ! $this->user->hasVerifiedEmail())
-                <p class="text-sm mt-2">
-                    {{ __('Your email address is unverified.') }}
-
-                    <button type="button" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" wire:click.prevent="sendEmailVerification">
-                        {{ __('Click here to re-send the verification email.') }}
-                    </button>
-                </p>
-
-                @if ($this->verificationLinkSent)
-                    <p class="mt-2 font-medium text-sm text-green-600">
-                        {{ __('A new verification link has been sent to your email address.') }}
-                    </p>
-                @endif
-            @endif
-        </div>
-    </x-slot>
-
-    <x-slot name="actions">
-        <x-action-message class="me-3" on="saved">
-            {{ __('Saved.') }}
-        </x-action-message>
-
-        <x-button wire:loading.attr="disabled" wire:target="photo">
-            {{ __('Save') }}
-        </x-button>
-    </x-slot>
-</x-form-section>
+    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

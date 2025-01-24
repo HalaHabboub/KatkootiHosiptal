@@ -48,4 +48,25 @@ class PatientController extends Controller
 
         return redirect()->route('patient.dashboard')->with('success', 'Profile completed successfully!');
     }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:100|unique:patients,email,' . auth()->id() . ',patient_id',
+            'phone' => 'required|string|max:20',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:male,female',
+            'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+            'existing_conditions' => 'nullable|string',
+            'current_medications' => 'nullable|string',
+            'allergies' => 'nullable|string',
+        ]);
+
+        $patient = auth()->user();
+        $patient->update($request->all());
+
+        return redirect()->back()->with('success', 'Profile updated successfully!');
+    }
+
 }
