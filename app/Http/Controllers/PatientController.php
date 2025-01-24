@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Department;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class PatientController extends Controller
 {
@@ -22,8 +27,31 @@ class PatientController extends Controller
 
     public function appointments()
     {
-        // Add logic to show patient appointments
-        return view('patient.appointments');
+        $patient = auth()->user();
+        $appointments = Appointment::where('patient_id', $patient->patient_id)
+            ->with('doctor')
+            ->orderBy('date_time', 'desc')
+            ->get()
+            ->map(function ($appointment) {
+                // Ensure date_time is a Carbon instance
+                $appointment->date_time = Carbon::parse($appointment->date_time);
+                return $appointment;
+            });
+
+        $stats = [
+            'total' => $appointments->count(),
+            'upcoming' => $appointments->where('status', 'confirmed')->where('date_time', '>', now())->count(),
+            'completed' => $appointments->where('date_time', '<', now())->count(),
+            'cancelled' => $appointments->where('status', 'cancelled')->count(),
+        ];
+
+        $departments = Department::with([
+            'doctors' => function ($query) {
+                $query->where('status', 'active');
+            }
+        ])->get();
+
+        return view('patientAppointments', compact('appointments', 'departments', 'stats'));
     }
 
     public function completeRegistration()
@@ -69,4 +97,46 @@ class PatientController extends Controller
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 
+    public function storeAppointment(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,doctor_id',
+            'date_time' => 'required|date|after:now',
+            'message' => 'nullable|string',
+        ]);
+
+        $appointment = new Appointment([
+            'appointment_id' => (string) Str::uuid(),
+            'patient_id' => auth()->id(),
+            'doctor_id' => $request->doctor_id,
+            'date_time' => $request->date_time,
+            'message' => $request->message,
+            'status' => 'pending'
+        ]);
+
+        $appointment->save();
+
+        return redirect()->route('appointments')->with('success', 'Appointment request submitted successfully!');
+    }
+
+    public function cancelAppointment(Request $request, $id)
+    {
+        $appointment = Appointment::where('appointment_id', $id)
+            ->where('patient_id', auth()->id())
+            ->firstOrFail();
+
+        $appointment->update([
+            'status' => 'cancelled',
+            'message' => $request->reason
+        ]);
+
+        return redirect()->back()->with('success', 'Appointment cancelled successfully!');
+    }
+
+    // Add this new method to get doctors by department
+    public function getDoctorsByDepartment($departmentId)
+    {
+        $doctors = Doctor::where('department_id', $departmentId)->get();
+        return response()->json($doctors);
+    }
 }

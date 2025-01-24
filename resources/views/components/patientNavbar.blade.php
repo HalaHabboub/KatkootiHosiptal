@@ -26,8 +26,8 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('profile') }}">My Profile</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('appointments') }}">Appointments</a>
+                <li class="nav-item {{ request()->routeIs('appointments') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('/appointments') }}">Appointments</a>
                 </li>
                 <li class="nav-item">
                     <form method="POST" action="{{ route('logout') }}">
@@ -40,6 +40,7 @@
                     <a class="btn btn-primary ml-lg-3" href="{{ route('login') }}">Login / Register</a>
                 </li>
                 @endauth
+                
             </ul>
         </div>
     </div>

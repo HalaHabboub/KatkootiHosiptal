@@ -16,8 +16,21 @@ class Doctor extends Authenticatable
         'password',
         'specialization',
         'qualification',
-        'status'
+        'status',
+        'department_id' // Add department_id to fillable
     ];
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id');
+    }
+
+    // Ensure the relationship uses the correct foreign key
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'department_id');
+    }
+
     protected $primaryKey = 'doctor_id';  // or 'admin_id' for Admin model
     public $incrementing = true;  // If the primary key auto-increments
     protected $keyType = 'int';   // Type of primary key (int for auto-incrementing)

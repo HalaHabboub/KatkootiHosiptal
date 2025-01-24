@@ -46,11 +46,17 @@ Route::middleware(['web'])->group(function () {
 
         // Patient Dashboard
         Route::middleware(['auth:patient'])->group(function () {
+
+            Route::get('/appointments', [PatientController::class, 'appointments'])->name('appointments');
+
             Route::get('/patient/dashboard', [PatientController::class, 'index'])->name('patient.dashboard');
             Route::get('/patient', function () {
                 return view('patient');
             })->name('patient');
             Route::put('/profile/update', [PatientController::class, 'updateProfile'])->name('profile.update');
+            Route::post('/appointments', [PatientController::class, 'storeAppointment'])->name('appointments.store');
+            Route::post('/appointments/{id}/cancel', [PatientController::class, 'cancelAppointment'])->name('appointments.cancel');
+            Route::get('/doctors/department/{id}', [PatientController::class, 'getDoctorsByDepartment'])->name('doctors.by.department');
         });
 
         // Doctor Dashboard
@@ -77,8 +83,6 @@ Route::middleware(['web'])->group(function () {
             return view('profile.update-profile-information-form');
         })->name('profile')->middleware('auth:patient');
 
-        Route::get('/patientAppointments', [PatientController::class, 'appointments'])->name('appointments');
-
         Route::get('/auth/login', [LoginController::class, 'showLoginForm'])->name('login');
 
         // Add this temporarily to debug routes
@@ -95,7 +99,10 @@ Route::middleware(['web'])->group(function () {
             ->name('profile.store')
             ->middleware('auth:patient');
 
-
         Auth::routes();
     });
 });
+
+// Move this route outside of any middleware groups
+Route::get('/doctors/by-department/{id}', [DoctorController::class, 'getByDepartment'])
+    ->name('doctors.by.department');

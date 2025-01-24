@@ -22,6 +22,12 @@ class Patient extends Authenticatable
         'allergies'
     ];
 
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id');
+    }
+
+
     protected $primaryKey = 'patient_id';  // Specify the custom primary key
     public $incrementing = true;  // If auto-incrementing
     protected $keyType = 'int';   // Type of primary key

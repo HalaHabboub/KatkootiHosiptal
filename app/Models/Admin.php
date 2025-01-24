@@ -16,6 +16,14 @@ class Admin extends Authenticatable
         'password',
         'role'
     ];
+
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'admin_id');
+    }
+
+
     protected $primaryKey = 'admin_id';  // Specify the custom primary key
     public $incrementing = true;
     protected $keyType = 'int';
