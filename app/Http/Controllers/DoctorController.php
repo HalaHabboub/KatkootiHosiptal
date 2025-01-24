@@ -3,13 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Doctor;
+use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class DoctorController extends Controller
 {
     public function index()
     {
-        return view('doctor');
+        $appointments = Appointment::where('doctor_id', Auth::id())
+            ->whereDate('date_time', Carbon::today())
+            ->with('patient')
+            ->get();
+
+        return view('doctor', compact('appointments'));
     }
 
     public function getAllDoctors()
