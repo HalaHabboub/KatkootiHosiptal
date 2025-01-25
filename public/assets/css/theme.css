@@ -2012,3 +2012,312 @@ a.text-dark:focus {
   color: #6E807A;
   border: 1px solid rgba(110, 128, 122, 0.3);
 }
+
+/* Doctor Schedule Specific Styles */
+.time-slot {
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.time-slot:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.time-slot.status-pending {
+  border-left-color: var(--warning);
+}
+
+.time-slot.status-confirmed {
+  border-left-color: var(--accent);
+}
+
+.time-slot.status-cancelled {
+  border-left-color: var(--danger);
+}
+
+.badge {
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.badge-pending {
+  background-color: rgba(238, 216, 24, 0.15);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+.btn-view-details {
+  background: var(--secondary);
+  color: white;
+  border-radius: 20px;
+  padding: 5px 15px;
+  margin-right: 5px;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.btn-view-details:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-update-status {
+  background: var(--accent);
+  color: white;
+  border-radius: 20px;
+  padding: 5px 15px;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.btn-update-status:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-container {
+  text-align: right;
+}
+
+.day-section {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.day-section:last-child {
+  border-bottom: none;
+}
+
+.day-section h6 {
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* Doctor Schedule Override Styles */
+.doctor-schedule-wrapper {
+  color: #333333;
+}
+
+.doctor-schedule-wrapper .time-slot {
+  color: #333333;
+}
+
+.doctor-schedule-wrapper .text-muted {
+  color: #666666 !important;
+}
+
+.doctor-schedule-wrapper small {
+  color: #666666;
+}
+
+.doctor-schedule-wrapper .day-section h6 {
+  color: #333333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* Calendar Styles */
+.calendar {
+  padding: 10px;
+}
+
+.calendar-day-header {
+  font-weight: 600;
+  color: var(--primary);
+  padding: 10px;
+  text-align: center;
+  width: calc(100% / 7);
+}
+
+.calendar-week {
+  margin-bottom: 8px;
+}
+
+.calendar-day {
+  padding: 10px;
+  min-width: 40px;
+  text-align: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendar-day:hover {
+  background-color: rgba(19, 198, 209, 0.1);
+}
+
+.calendar-day.empty {
+  cursor: default;
+}
+
+.calendar-day.today {
+  background-color: var(--primary);
+  color: white;
+  font-weight: bold;
+}
+
+.calendar-day.has-appointments {
+  border: 2px solid var(--accent);
+  font-weight: 500;
+}
+
+.calendar-controls button {
+  min-width: 100px;
+}
+
+.calendar-grid {
+  margin-top: 10px;
+}
+
+.calendar-day {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.calendar-day:not(.empty):hover {
+  background-color: rgba(19, 198, 209, 0.1);
+  cursor: pointer;
+}
+
+.calendar-day.empty {
+  background-color: transparent;
+}
+
+.appointment-dot {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+/* Simple Calendar Styles */
+.table td {
+  height: 60px;
+  width: 60px;
+  vertical-align: middle;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.table td:empty {
+  cursor: default;
+}
+
+.table td:not(:empty):hover {
+  background-color: rgba(19, 198, 209, 0.1);
+}
+
+.table td.today {
+  background-color: var(--primary);
+  color: white;
+}
+
+.table td.unavailable {
+  background-color: rgba(255, 73, 67, 0.15);
+  color: #FF4943;
+  text-decoration: line-through;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  color: var(--primary);
+  font-weight: 600;
+  padding: 15px;
+}
+
+#monthDisplay {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.table td {
+  height: 60px;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.table td:hover:not(:empty) {
+  background-color: rgba(19, 198, 209, 0.1);
+}
+
+.table td.today {
+  background-color: var(--primary);
+  color: white;
+  font-weight: bold;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.fc-event {
+  cursor: pointer;
+}
+
+.fc-event:hover {
+  opacity: 0.9;
+}
+
+#calendar {
+  height: 600px;
+  margin: 20px 0;
+}
+
+/* Status Badges */
+.badge-confirmed {
+  background-color: rgba(118, 189, 65, 0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.badge-pending {
+  background-color: rgba(238, 216, 24, 0.15);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+.badge-cancelled {
+  background-color: rgba(255, 73, 67, 0.15);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+/* Status Time Slots */
+.time-slot.status-confirmed {
+  border-left-color: var(--success);
+}
+
+.time-slot.status-pending {
+  border-left-color: var(--warning);
+}
+
+.time-slot.status-cancelled {
+  border-left-color: var(--danger);
+}

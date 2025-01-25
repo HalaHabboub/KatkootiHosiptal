@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 
@@ -63,8 +64,18 @@ Route::middleware(['web'])->group(function () {
         Route::middleware(['auth:doctor'])->group(function () {
             Route::get('/doctor/dashboard', [DoctorController::class, 'index'])->name('doctor.dashboard');
             Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor');
-            Route::get('/doctor/appointment/{appointmentId}/details', [DoctorController::class, 'showAppointmentDetails'])
+            Route::get('/appointment/details/{appointmentId}', [DoctorController::class, 'showAppointmentDetails'])
                 ->name('appointment.details');
+
+            // Add these new routes for doctor schedule
+            Route::get('/doctor/schedule', [DoctorController::class, 'schedule'])->name('doctor.schedule');
+            Route::post('/doctor/schedule', [DoctorController::class, 'storeSchedule'])->name('doctor.schedule.store');
+            Route::delete('/doctor/schedule/{schedule}', [DoctorController::class, 'deleteSchedule'])->name('doctor.schedule.delete');
+
+            // Add the new route for appointment status updates
+            Route::post('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])
+                ->name('appointments.updateStatus')
+                ->middleware('auth:doctor');
         });
 
         // Admin Dashboard

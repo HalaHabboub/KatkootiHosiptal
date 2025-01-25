@@ -22,6 +22,7 @@ class Appointment extends Model
         'date_time',
         'status',
         'message',
+        'status',
     ];
 
     // Add date casting

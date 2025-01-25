@@ -14,9 +14,9 @@
         <li class="nav-item {{ Request::is('doctor/dashboard') ? 'active' : '' }}">
           <a class="nav-link" href="{{ route('doctor.dashboard') }}">Dashboard</a>
         </li>
-        {{-- <li class="nav-item {{ Request::is('doctor/schedule') ? 'active' : '' }}">
+        <li class="nav-item {{ Request::is('doctor/schedule') ? 'active' : '' }}">
           <a class="nav-link" href="{{ route('doctor.schedule') }}">Doctor Schedule</a>
-        </li> --}}
+        </li>
         <li class="nav-item">
           <form method="POST" action="{{ route('logout') }}">
             @csrf
