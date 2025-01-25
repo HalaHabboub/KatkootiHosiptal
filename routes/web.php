@@ -83,6 +83,10 @@ Route::middleware(['web'])->group(function () {
             Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
             Route::get('/admin/appointment/{appointmentId}', [AdminController::class, 'showAppointment'])
                 ->name('admin.appointment.details');  // This matches the route name used in admin.blade.php
+            Route::get('/admin/doctors', [AdminController::class, 'manageDoctors'])->name('admin.doctors.manage');
+            Route::post('/admin/doctors', [AdminController::class, 'storeDoctor'])->name('admin.doctors.store');
+            Route::delete('/admin/doctors/{doctor}', [AdminController::class, 'deleteDoctor'])->name('admin.doctors.delete');
+            Route::put('/admin/doctors/{doctor}', [AdminController::class, 'updateDoctor'])->name('admin.doctors.update');
         });
 
         Route::get('/about', function () {

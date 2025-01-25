@@ -14,7 +14,9 @@
                 <li class="nav-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
                 </li>
-                
+                <li class="nav-item {{ Request::is('admin/doctors') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.doctors.manage') }}">Manage Doctors</a>
+                </li>
                 <li class="nav-item">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
