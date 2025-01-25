@@ -63,6 +63,8 @@ Route::middleware(['web'])->group(function () {
         Route::middleware(['auth:doctor'])->group(function () {
             Route::get('/doctor/dashboard', [DoctorController::class, 'index'])->name('doctor.dashboard');
             Route::get('/doctor', [DoctorController::class, 'index'])->name('doctor');
+            Route::get('/doctor/appointment/{appointmentId}/details', [DoctorController::class, 'showAppointmentDetails'])
+                ->name('appointment.details');
         });
 
         // Admin Dashboard

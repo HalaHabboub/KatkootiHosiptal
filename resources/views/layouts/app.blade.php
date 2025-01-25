@@ -21,6 +21,9 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/animate/animate.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}">
     @livewireStyles
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body class="font-sans antialiased">
@@ -29,6 +32,7 @@
         <!-- Ensure the correct path to the patient's navbar -->
         <main class="py-4">
             @yield('content')
+            <!-- Remove the extra button that was here -->
         </main>
 
         @include('components.footer')

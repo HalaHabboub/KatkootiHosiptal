@@ -25,7 +25,6 @@
                     <tr>
                         <th>Time</th>
                         <th>Patient</th>
-                        <th>Type</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -35,24 +34,24 @@
                     <tr>
                         <td>{{ \Carbon\Carbon::parse($appointment->date_time)->format('h:i A') }}</td>
                         <td>{{ $appointment->patient->name }}</td>
-                        <td>{{ $appointment->type }}</td>
                         <td>
-                            <span class="badge badge-{{ $appointment->status == 'Confirmed' ? 'success' : 'warning' }}">
-                                {{ $appointment->status }}
+                            @php
+                                $statusClass = match($appointment->status) {
+                                    'confirmed' => 'status-confirmed',
+                                    'pending' => 'status-pending',
+                                    'cancelled' => 'status-cancelled',
+                                    default => 'status-default'
+                                };
+                            @endphp
+                            <span class="status-badge {{ $statusClass }}">
+                                {{ ucfirst($appointment->status) }}
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-primary action-btn" 
-                                data-toggle="modal" 
-                                data-target="#detailsModal"
-                                data-name="{{ $appointment->patient->name }}"
-                                data-time="{{ \Carbon\Carbon::parse($appointment->date_time)->format('h:i A') }}"
-                                data-type="{{ $appointment->type }}"
-                                data-age="{{ $appointment->patient->age }}"
-                                data-contact="{{ $appointment->patient->phone }}"
-                                data-email="{{ $appointment->patient->email }}">
+                            <a href="{{ route('appointment.details', ['appointmentId' => $appointment->appointment_id]) }}" 
+                               class="btn btn-sm btn-primary">
                                 View Details
-                            </button>
+                            </a>
                         </td>
                     </tr>
                     @endforeach
@@ -62,44 +61,6 @@
     </div>
 </div>
 
-<!-- Appointment Details Modal -->
-<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalLabel">Appointment Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Patient Name:</strong> <span id="modal-name"></span></p>
-                <p><strong>Appointment Time:</strong> <span id="modal-time"></span></p>
-                <p><strong>Appointment Type:</strong> <span id="modal-type"></span></p>
-                <p><strong>Age:</strong> <span id="modal-age"></span></p>
-                <p><strong>Contact:</strong> <span id="modal-contact"></span></p>
-                <p><strong>Email:</strong> <span id="modal-email"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @endsection
 
-@section('scripts')
-<script>
-$(document).ready(function() {
-    $('.action-btn').click(function() {
-        $('#modal-name').text($(this).data('name'));
-        $('#modal-time').text($(this).data('time'));
-        $('#modal-type').text($(this).data('type'));
-        $('#modal-age').text($(this).data('age'));
-        $('#modal-contact').text($(this).data('contact'));
-        $('#modal-email').text($(this).data('email'));
-    });
-});
-</script>
-@endsection

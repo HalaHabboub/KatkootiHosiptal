@@ -42,4 +42,22 @@ class DoctorController extends Controller
             return response()->json(['error' => 'Failed to fetch doctors'], 500);
         }
     }
+
+    public function showAppointmentDetails($appointmentId)
+    {
+        try {
+            $appointment = Appointment::with('patient')
+                ->where('appointment_id', $appointmentId)
+                ->where('doctor_id', auth()->id())
+                ->firstOrFail();
+
+            return view('viewAppointmentDetails', [
+                'appointment' => $appointment,
+                'patient' => $appointment->patient
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error showing appointment details: ' . $e->getMessage());
+            return redirect()->route('doctor.dashboard')->with('error', 'Appointment not found');
+        }
+    }
 }
