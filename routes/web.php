@@ -73,14 +73,17 @@ Route::middleware(['web'])->group(function () {
             Route::post('/doctor/schedule', [DoctorController::class, 'storeSchedule'])->name('doctor.schedule.store');
             Route::delete('/doctor/schedule/{schedule}', [DoctorController::class, 'deleteSchedule'])->name('doctor.schedule.delete');
 
-            // Add the new route for appointment status updates
+            // Update or add this route for appointment status updates
             Route::post('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])
-                ->name('appointments.updateStatus')
-                ->middleware('auth:doctor');
+                ->name('appointments.updateStatus');
 
             // Add the new route for marking doctor unavailable
             Route::post('/doctor/mark-unavailable', [DoctorScheduleController::class, 'markUnavailable'])
                 ->name('doctor.mark-unavailable');
+
+            // Add the new route for getting weekly appointments
+            Route::get('/doctor/appointments/week/{date}', [DoctorController::class, 'getWeeklyAppointments'])
+                ->name('doctor.weekly-appointments');
         });
 
         // Admin Dashboard

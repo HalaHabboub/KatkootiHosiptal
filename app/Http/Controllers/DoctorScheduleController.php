@@ -14,31 +14,52 @@ class DoctorScheduleController extends Controller
 
     public function index()
     {
-        // Existing code for weekly view
-        $weekDays = // ...your existing code...
-            $todayAppointments = // ...your existing code...
+        $numberOfWeeks = 4;
+        $weekDays = [];
 
-            // Prepare calendar events
-            $calendarEvents = Appointment::where('doctor_id', Auth::id())
-                ->get()
-                ->map(function ($appointment) {
-                    return [
-                        'id' => $appointment->appointment_id,
-                        'title' => $appointment->patient->name,
-                        'start' => $appointment->date_time,
-                        'backgroundColor' => $this->getStatusColor($appointment->status),
-                        'borderColor' => $this->getStatusColor($appointment->status),
-                    ];
-                });
+        for ($i = 0; $i < $numberOfWeeks; $i++) {
+            $startOfWeek = Carbon::now()->startOfWeek()->addWeeks($i);
+            $endOfWeek = Carbon::now()->endOfWeek()->addWeeks($i);
 
-        // Get unavailable dates
+            // Create a date range for the week
+            $dates = [];
+            for ($date = clone $startOfWeek; $date->lte($endOfWeek); $date->addDay()) {
+                $dates[$date->format('Y-m-d')] = [];
+            }
+
+            // Get appointments for this week
+            $appointments = Appointment::where('doctor_id', Auth::id())
+                ->whereBetween('date_time', [$startOfWeek, $endOfWeek])
+                ->orderBy('date_time')
+                ->get();
+
+            // Group appointments by date
+            foreach ($appointments as $appointment) {
+                $dateKey = Carbon::parse($appointment->date_time)->format('Y-m-d');
+                if (!isset($dates[$dateKey])) {
+                    $dates[$dateKey] = [];
+                }
+                $dates[$dateKey][] = $appointment;
+            }
+
+            $weekDays[] = [
+                'week_start' => $startOfWeek->format('Y-m-d'),
+                'week_end' => $endOfWeek->format('Y-m-d'),
+                'dates' => $dates
+            ];
+        }
+
+        $todayAppointments = Appointment::where('doctor_id', Auth::id())
+            ->whereDate('date_time', Carbon::today())
+            ->count();
+
         $unavailableDates = DoctorUnavailability::where('doctor_id', Auth::id())
             ->pluck('date')
             ->map(function ($date) {
                 return $date->format('Y-m-d');
             });
 
-        return view('doctorSchedule', compact('weekDays', 'todayAppointments', 'calendarEvents', 'unavailableDates'));
+        return view('doctorSchedule', compact('weekDays', 'todayAppointments', 'unavailableDates'));
     }
 
     private function getStatusColor($status)

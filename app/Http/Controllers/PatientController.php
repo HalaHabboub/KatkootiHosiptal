@@ -134,16 +134,25 @@ class PatientController extends Controller
 
     public function cancelAppointment(Request $request, $id)
     {
-        $appointment = Appointment::where('appointment_id', $id)
-            ->where('patient_id', auth()->id())
-            ->firstOrFail();
+        try {
+            $appointment = Appointment::where('appointment_id', $id)
+                ->where('patient_id', auth()->id())
+                ->firstOrFail();
 
-        $appointment->update([
-            'status' => 'cancelled',
-            'message' => $request->reason
-        ]);
+            $appointment->update([
+                'status' => 'cancelled'
+            ]);
 
-        return redirect()->back()->with('success', 'Appointment cancelled successfully!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment cancelled successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error cancelling appointment'
+            ], 500);
+        }
     }
 
     // Add this new method to get doctors by department

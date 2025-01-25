@@ -156,7 +156,7 @@ class DoctorController extends Controller
             ->whereDate('date_time', now()->format('Y-m-d'))
             ->count();
 
-        $weekDays = $this->getWeeklyAppointments($doctorId);
+        $weekDays = $this->fetchWeeklyAppointments($doctorId);
 
         return view('doctor.schedule', [
             'unavailableDays' => $unavailableDays,
@@ -165,7 +165,7 @@ class DoctorController extends Controller
         ]);
     }
 
-    private function getWeeklyAppointments($doctorId)
+    private function fetchWeeklyAppointments($doctorId)
     {
         $startOfWeek = now()->startOfWeek();
         $endOfWeek = now()->endOfWeek();
@@ -256,5 +256,32 @@ class DoctorController extends Controller
                 'message' => 'Error fetching unavailable dates'
             ], 500);
         }
+    }
+
+    public function getWeeklyAppointments($date)
+    {
+        $startDate = Carbon::parse($date)->startOfWeek();
+        $endDate = Carbon::parse($date)->endOfWeek();
+
+        $appointments = Appointment::where('doctor_id', Auth::id())
+            ->whereBetween('date_time', [$startDate, $endDate])
+            ->with('patient')
+            ->get()
+            ->map(function ($appointment) {
+                $appointment->time = Carbon::parse($appointment->date_time)->format('H:i');
+                return $appointment;
+            })
+            ->groupBy(function ($appointment) {
+                return Carbon::parse($appointment->date_time)->format('Y-m-d');
+            });
+
+        // Fill in empty days
+        $result = [];
+        for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
+            $dateStr = $date->format('Y-m-d');
+            $result[$dateStr] = $appointments[$dateStr] ?? [];
+        }
+
+        return response()->json($result);
     }
 }

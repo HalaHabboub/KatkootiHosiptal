@@ -38,48 +38,22 @@
                 <div class="col-md-9">
                     <!-- Weekly Calendar and Appointments -->
                     <div class="card mb-4">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">This Week's Appointments</h5>
+                            <div>
+                                <button type="button" class="btn btn-secondary btn-sm" id="prevWeek">
+                                    <i class="fas fa-chevron-left"></i> Previous Week
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm ms-2" id="currentWeek">
+                                    Current Week
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm ms-2" id="nextWeek">
+                                    Next Week <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            @foreach($weekDays as $date => $appointments)
-                                <div class="day-section mb-4">
-                                    <h6>{{ Carbon\Carbon::parse($date)->format('l, M d') }}</h6>
-                                    @if($appointments->count() > 0)
-                                        @foreach($appointments as $appointment)
-                                        <div class="time-slot status-{{ $appointment->status }}">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <strong>{{ Carbon\Carbon::parse($appointment->date_time)->format('h:i A') }}</strong>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div>{{ $appointment->patient->name }}</div>
-                                                    <small class="text-muted">{{ $appointment->type }}</small>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <span class="badge badge-{{ $appointment->status }}">{{ ucfirst($appointment->status) }}</span>
-                                                </div>
-                                                <div class="col-md-3 btn-container">
-                                                    <a href="{{ route('appointment.details', ['appointmentId' => $appointment->appointment_id]) }}" class="btn btn-sm btn-view-details">
-                                                        View
-                                                    </a>
-                                                    <button class="btn btn-sm btn-view-details bg-success text-white" 
-                                                        onclick="updateStatus('{{ $appointment->appointment_id }}', 'confirmed')">
-                                                        Approve
-                                                    </button>
-                                                    <button class="btn btn-sm btn-view-details bg-danger text-white" 
-                                                        onclick="updateStatus('{{ $appointment->appointment_id }}', 'cancelled')">
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    @else
-                                        <p class="text-muted">No appointments scheduled</p>
-                                    @endif
-                                </div>
-                            @endforeach
+                        <div class="card-body" id="weeklyAppointments">
+                            <!-- Weekly appointments will be loaded here -->
                         </div>
                     </div>
 
@@ -164,6 +138,25 @@
                 renderCalendar(currentDate);
             }
         });
+
+        // Initialize weekly calendar
+        loadWeeklyAppointments(currentWeekStart);
+
+        // Week navigation handlers
+        document.getElementById('prevWeek').addEventListener('click', () => {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            loadWeeklyAppointments(currentWeekStart);
+        });
+
+        document.getElementById('nextWeek').addEventListener('click', () => {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            loadWeeklyAppointments(currentWeekStart);
+        });
+
+        document.getElementById('currentWeek').addEventListener('click', () => {
+            currentWeekStart = new Date();
+            loadWeeklyAppointments(currentWeekStart);
+        });
     });
 
     let currentDate = new Date();
@@ -191,7 +184,7 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+                        <th>Sun</th><th>Mon</th><Tue</th><Wed</th><Thu</th><Fri</th><Sat</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -298,8 +291,96 @@
         });
     }
 
-    // Keep the existing saveUnavailableDates and updateStatus functions
-    // ...existing code...
+    let currentWeekStart = new Date();
+    
+    function loadWeeklyAppointments(startDate) {
+        const formattedDate = startDate.toISOString().split('T')[0];
+        
+        fetch(`/doctor/appointments/week/${formattedDate}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('weeklyAppointments').innerHTML = renderWeeklyAppointments(data);
+            })
+            .catch(error => console.error('Error loading appointments:', error));
+    }
+
+    function renderWeeklyAppointments(weekData) {
+        let html = '';
+        
+        Object.entries(weekData).forEach(([date, appointments]) => {
+            html += `
+                <div class="day-section mb-4">
+                    <h6>${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</h6>
+                    ${appointments.length > 0 
+                        ? appointments.map(appointment => `
+                            <div class="time-slot status-${appointment.status}">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <strong>${appointment.time}</strong>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div>${appointment.patient.name}</div>
+                                        
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="badge badge-${appointment.status}">${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}</span>
+                                    </div>
+                                    <div class="col-md-3 btn-container">
+                                        <a href="{{ route('appointment.details', '') }}/${appointment.appointment_id}" 
+                                           class="btn btn-sm btn-view-details">
+                                            View
+                                        </a>
+                                        <button class="btn btn-sm btn-view-details bg-success text-white" 
+                                            onclick="updateStatus('${appointment.appointment_id}', 'confirmed')">
+                                            Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-view-details bg-danger text-white" 
+                                            onclick="updateStatus('${appointment.appointment_id}', 'cancelled')">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')
+                        : '<p class="text-muted">No appointments scheduled</p>'
+                    }
+                </div>
+            `;
+        });
+        
+        return html;
+    }
+
+    // Add this function after your existing functions
+    function updateStatus(appointmentId, status) {
+        if (!confirm(`Are you sure you want to ${status} this appointment?`)) {
+            return;
+        }
+
+        fetch(`/appointments/${appointmentId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Refresh the weekly appointments view
+                loadWeeklyAppointments(currentWeekStart);
+                alert('Appointment status updated successfully!');
+            } else {
+                alert(data.message || 'Error updating appointment status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating appointment status');
+        });
+    }
+
 </script>
 
 <style>

@@ -55,7 +55,8 @@
             </div>
         </div>
 
-        <!-- Appointments Table -->
+        <!-- Current Appointments Table -->
+        <h4 class="mb-4">Upcoming Appointments</h4>
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
@@ -68,28 +69,64 @@
                 </thead>
                 <tbody>
                     @foreach($appointments as $appointment)
+                        @if($appointment->date_time > now())
+                        <tr>
+                            <td>
+                                <strong>{{ $appointment->date_time->format('M d, Y') }}</strong><br>
+                                <small class="text-muted">{{ $appointment->date_time->format('h:i A') }}</small>
+                            </td>
+                            <td>
+                                {{ $appointment->doctor->name }}
+                            </td>
+                            <td>
+                                <span class="status-badge badge-{{ $appointment->status }}">
+                                    {{ ucfirst($appointment->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($appointment->status !== 'cancelled' && $appointment->date_time > now())
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            onclick="showCancelModal('{{ $appointment->appointment_id }}')">
+                                        Cancel
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+                        @endif
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Previous Appointments Table -->
+        <h4 class="mt-5 mb-4">Previous Bookings</h4>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
                     <tr>
-                        <td>
-                            <strong>{{ $appointment->date_time->format('M d, Y') }}</strong><br>
-                            <small class="text-muted">{{ $appointment->date_time->format('h:i A') }}</small>
-                        </td>
-                        <td>
-                            {{ $appointment->doctor->name }}
-                        </td>
-                        <td>
-                            <span class="status-badge badge-{{ $appointment->status }}">
-                                {{ ucfirst($appointment->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            @if($appointment->status !== 'cancelled' && $appointment->date_time > now())
-                                <button class="btn btn-sm btn-outline-danger" 
-                                        onclick="showCancelModal('{{ $appointment->appointment_id }}')">
-                                    Cancel
-                                </button>
-                            @endif
-                        </td>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Status</th>
                     </tr>
+                </thead>
+                <tbody>
+                    @foreach($appointments as $appointment)
+                        @if($appointment->date_time <= now())
+                        <tr class="text-muted">
+                            <td>
+                                <strong>{{ $appointment->date_time->format('M d, Y') }}</strong><br>
+                                <small>{{ $appointment->date_time->format('h:i A') }}</small>
+                            </td>
+                            <td>
+                                {{ $appointment->doctor->name }}
+                            </td>
+                            <td>
+                                <span class="status-badge badge-{{ $appointment->status }}">
+                                    {{ ucfirst($appointment->status) }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
@@ -152,7 +189,7 @@
     </div>
 </div>
 
-<!-- Cancel Modal -->
+<!-- Replace the existing Cancel Modal with this simpler version -->
 <div class="modal fade" id="cancelModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -163,14 +200,11 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Reason for cancellation</label>
-                        <textarea name="reason" class="form-control" required></textarea>
-                    </div>
+                    <p>Are you sure you want to cancel this appointment?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger">Confirm Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, Keep it</button>
+                    <button type="submit" class="btn btn-danger">Yes, Cancel</button>
                 </div>
             </form>
         </div>
@@ -224,50 +258,42 @@
 </style>
 @endpush
 
-@push('scripts')
+@section('head-scripts')
 <script>
 function showCancelModal(appointmentId) {
+    console.log('showCancelModal called with:', appointmentId);
     const form = document.getElementById('cancelForm');
     form.action = `/appointments/${appointmentId}/cancel`;
     $('#cancelModal').modal('show');
 }
 
-// Add this new function and event listener
-document.addEventListener('DOMContentLoaded', function() {
-    const doctorSelect = document.querySelector('select[name="doctor_id"]');
-    const dateTimeInput = document.querySelector('input[name="date_time"]');
-    
-    // Store unavailable dates for each doctor
-    const doctorUnavailableDates = @json($doctorUnavailableDates ?? []);
-    
-    async function checkDoctorAvailability() {
-        const doctorId = doctorSelect.value;
-        const selectedDate = dateTimeInput.value.split('T')[0]; // Get just the date part
-        
-        if (doctorId && selectedDate) {
-            if (doctorUnavailableDates[doctorId]?.includes(selectedDate)) {
-                alert('Sorry, the doctor is not available on this date. Please select another day.');
-                dateTimeInput.value = ''; // Clear the date
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // Add event listeners
-    dateTimeInput.addEventListener('change', checkDoctorAvailability);
-    
-    // Modify form submission
-    const form = document.querySelector('form[action="{{ route('appointments.store') }}"]');
-    form.addEventListener('submit', async function(e) {
+$(document).ready(function() {
+    $('#cancelForm').on('submit', function(e) {
         e.preventDefault();
-        if (await checkDoctorAvailability()) {
-            this.submit();
-        }
+        
+        $.ajax({
+            url: this.action,
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(data) {
+                $('#cancelModal').modal('hide');
+                if (data.success) {
+                    alert('Appointment cancelled successfully');
+                    location.reload();
+                } else {
+                    alert('Error cancelling appointment');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Error cancelling appointment');
+            }
+        });
     });
-});
 
-document.addEventListener('DOMContentLoaded', function() {
+    // Rest of your existing DOMContentLoaded code for doctor selection and date checking
     const form = document.querySelector('form[action="{{ route('appointments.store') }}"]');
     const doctorSelect = document.querySelector('select[name="doctor_id"]');
     const dateTimeInput = document.querySelector('input[name="date_time"]');
@@ -306,4 +332,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endpush
+@endsection
