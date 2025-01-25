@@ -98,6 +98,15 @@
         <!-- Book New Appointment Form -->
         <div class="mt-5">
             <h3>Book New Appointment</h3>
+            <!-- Add this right before the book appointment form -->
+            @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show mt-4" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @endif
             <form action="{{ route('appointments.store') }}" method="POST" class="mt-4">
                 @csrf
                 <div class="row">
@@ -222,5 +231,79 @@ function showCancelModal(appointmentId) {
     form.action = `/appointments/${appointmentId}/cancel`;
     $('#cancelModal').modal('show');
 }
+
+// Add this new function and event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorSelect = document.querySelector('select[name="doctor_id"]');
+    const dateTimeInput = document.querySelector('input[name="date_time"]');
+    
+    // Store unavailable dates for each doctor
+    const doctorUnavailableDates = @json($doctorUnavailableDates ?? []);
+    
+    async function checkDoctorAvailability() {
+        const doctorId = doctorSelect.value;
+        const selectedDate = dateTimeInput.value.split('T')[0]; // Get just the date part
+        
+        if (doctorId && selectedDate) {
+            if (doctorUnavailableDates[doctorId]?.includes(selectedDate)) {
+                alert('Sorry, the doctor is not available on this date. Please select another day.');
+                dateTimeInput.value = ''; // Clear the date
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Add event listeners
+    dateTimeInput.addEventListener('change', checkDoctorAvailability);
+    
+    // Modify form submission
+    const form = document.querySelector('form[action="{{ route('appointments.store') }}"]');
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (await checkDoctorAvailability()) {
+            this.submit();
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[action="{{ route('appointments.store') }}"]');
+    const doctorSelect = document.querySelector('select[name="doctor_id"]');
+    const dateTimeInput = document.querySelector('input[name="date_time"]');
+    
+    // Fetch doctor unavailable dates when a doctor is selected
+    doctorSelect.addEventListener('change', async function() {
+        const doctorId = this.value;
+        if (doctorId) {
+            try {
+                const response = await fetch(`/doctors/${doctorId}/unavailable-dates`);
+                const data = await response.json();
+                window.unavailableDates = data.unavailable_dates || [];
+            } catch (error) {
+                console.error('Error fetching unavailable dates:', error);
+            }
+        }
+    });
+
+    // Check date availability when selected
+    dateTimeInput.addEventListener('change', function() {
+        const selectedDate = this.value.split('T')[0];
+        if (window.unavailableDates && window.unavailableDates.includes(selectedDate)) {
+            alert('Sorry, the doctor is not available on this date. Please select another day.');
+            this.value = ''; // Clear the selected date
+        }
+    });
+
+    // Add form submission validation
+    form.addEventListener('submit', function(e) {
+        const selectedDate = dateTimeInput.value.split('T')[0];
+        if (window.unavailableDates && window.unavailableDates.includes(selectedDate)) {
+            e.preventDefault();
+            alert('Sorry, the doctor is not available on this date. Please select another day.');
+            dateTimeInput.value = '';
+        }
+    });
+});
 </script>
 @endpush

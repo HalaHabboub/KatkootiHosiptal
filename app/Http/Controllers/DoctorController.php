@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Doctor;
 use App\Models\Appointment;
+use App\Models\DoctorUnavailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -31,8 +32,18 @@ class DoctorController extends Controller
         try {
             $doctors = Doctor::where('department_id', $departmentId)
                 ->where('status', 'active')
-                ->select('doctor_id', 'name')
-                ->get();
+                ->with([
+                    'unavailableDates' => function ($query) {
+                        $query->where('date', '>=', now()->format('Y-m-d'));
+                    }
+                ])
+                ->get()
+                ->map(function ($doctor) {
+                    $doctor->unavailable_dates = $doctor->unavailableDates->pluck('date')->map(function ($date) {
+                        return Carbon::parse($date)->format('Y-m-d');
+                    });
+                    return $doctor;
+                });
 
             \Log::info('Doctors found for department ' . $departmentId . ':', ['count' => $doctors->count()]);
 
@@ -67,6 +78,14 @@ class DoctorController extends Controller
                 ->get();
         }
 
+        // Load unavailable dates from database
+        $unavailableDates = DoctorUnavailability::where('doctor_id', Auth::id())
+            ->pluck('date')
+            ->map(function ($date) {
+                return Carbon::parse($date)->format('Y-m-d');
+            })
+            ->toArray();
+
         // Get today's total appointments
         $todayAppointments = Appointment::where('doctor_id', Auth::id())
             ->whereDate('date_time', today())
@@ -81,7 +100,7 @@ class DoctorController extends Controller
                 return $appointment->date_time->format('Y-m-d');
             });
 
-        return view('doctorSchedule', compact('weekDays', 'todayAppointments', 'monthAppointments'));
+        return view('doctorSchedule', compact('weekDays', 'todayAppointments', 'monthAppointments', 'unavailableDates'));
     }
 
     public function storeSchedule(Request $request)
@@ -215,5 +234,27 @@ class DoctorController extends Controller
             'cancelled' => 'danger',
             'completed' => 'info'
         ][$status] ?? 'secondary';
+    }
+
+    public function getUnavailableDates($doctorId)
+    {
+        try {
+            $unavailableDates = DoctorUnavailability::where('doctor_id', $doctorId)
+                ->where('date', '>=', now()->format('Y-m-d'))
+                ->pluck('date')
+                ->map(function ($date) {
+                    return Carbon::parse($date)->format('Y-m-d');
+                });
+
+            return response()->json([
+                'success' => true,
+                'unavailable_dates' => $unavailableDates
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching unavailable dates'
+            ], 500);
+        }
     }
 }

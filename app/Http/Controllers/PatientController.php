@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Department;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\DoctorUnavailability;
 
 class PatientController extends Controller
 {
@@ -104,6 +105,18 @@ class PatientController extends Controller
             'date_time' => 'required|date|after:now',
             'message' => 'nullable|string',
         ]);
+
+        // Check if doctor is unavailable on this date
+        $appointmentDate = Carbon::parse($request->date_time)->format('Y-m-d');
+        $isUnavailable = DoctorUnavailability::where('doctor_id', $request->doctor_id)
+            ->whereDate('date', $appointmentDate)
+            ->exists();
+
+        if ($isUnavailable) {
+            return redirect()->back()
+                ->with('error', 'Sorry, the doctor is not available on this date. Please select another day.')
+                ->withInput();
+        }
 
         $appointment = new Appointment([
             'appointment_id' => (string) Str::uuid(),

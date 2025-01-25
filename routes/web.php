@@ -5,6 +5,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DoctorScheduleController;  // Add this line
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 
@@ -76,6 +77,10 @@ Route::middleware(['web'])->group(function () {
             Route::post('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])
                 ->name('appointments.updateStatus')
                 ->middleware('auth:doctor');
+
+            // Add the new route for marking doctor unavailable
+            Route::post('/doctor/mark-unavailable', [DoctorScheduleController::class, 'markUnavailable'])
+                ->name('doctor.mark-unavailable');
         });
 
         // Admin Dashboard
@@ -122,3 +127,7 @@ Route::middleware(['web'])->group(function () {
 // Move this route outside of any middleware groups
 Route::get('/doctors/by-department/{id}', [DoctorController::class, 'getByDepartment'])
     ->name('doctors.by.department');
+
+// Add the new route for getting unavailable dates for a doctor
+Route::get('/doctors/{doctorId}/unavailable-dates', [DoctorController::class, 'getUnavailableDates'])
+    ->name('doctors.unavailable-dates');
