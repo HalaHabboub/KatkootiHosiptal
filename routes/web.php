@@ -81,8 +81,9 @@ Route::middleware(['web'])->group(function () {
         // Admin Dashboard
         Route::middleware(['auth:admin'])->group(function () {
             Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+            Route::get('/admin/appointment/{appointmentId}', [AdminController::class, 'showAppointment'])
+                ->name('admin.appointment.details');  // This matches the route name used in admin.blade.php
         });
-
 
         Route::get('/about', function () {
             return view('about');

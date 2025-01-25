@@ -3,7 +3,11 @@
 @section('title', 'Appointment Details')
 
 @section('content')
-@include('components.doctorNavbar')
+@if(Auth::guard('doctor')->check())
+    @include('components.doctorNavbar')
+@elseif(Auth::guard('admin')->check())
+    @include('components.adminNavbar')
+@endif
 
 <div class="page-section">
     <div class="container">
@@ -54,7 +58,8 @@
             </div>
         @endif
         <div class="text-center mt-4">
-            <a href="{{ route('doctor.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="{{ Auth::guard('admin')->check() ? route('admin.dashboard') : route('doctor.dashboard') }}" 
+               class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </div>
 </div>
