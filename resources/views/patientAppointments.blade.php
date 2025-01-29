@@ -135,7 +135,14 @@
         <!-- Book New Appointment Form -->
         <div class="mt-5">
             <h3>Book New Appointment</h3>
-            <!-- Add this right before the book appointment form -->
+            @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show mt-4" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @endif
             @if(session('error'))
             <div class="alert alert-danger alert-dismissible fade show mt-4" role="alert">
                 {{ session('error') }}
@@ -329,6 +336,27 @@ $(document).ready(function() {
             alert('Sorry, the doctor is not available on this date. Please select another day.');
             dateTimeInput.value = '';
         }
+    });
+
+    // Set min and max dates for the datetime input
+    const now = new Date();
+    const maxDate = new Date(now.getFullYear(), now.getMonth() + 3, 0); // Last day of 3 months from now
+    
+    dateTimeInput.min = now.toISOString().slice(0, 16);
+    dateTimeInput.max = maxDate.toISOString().slice(0, 16);
+
+    dateTimeInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        const hours = selectedDate.getHours();
+
+        // Check if time is within allowed hours
+        if (hours < 10 || hours >= 17) {
+            alert('Appointments are only available between 10 AM and 5 PM.');
+            this.value = ''; // Clear the selected date/time
+            return;
+        }
+
+        
     });
 });
 </script>

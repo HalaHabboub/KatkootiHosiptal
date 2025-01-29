@@ -106,8 +106,38 @@ class PatientController extends Controller
             'message' => 'nullable|string',
         ]);
 
+        $appointmentDateTime = Carbon::parse($request->date_time);
+        $maxDate = now()->addMonths(3)->endOfMonth();
+        $appointmentHour = (int) $appointmentDateTime->format('H');
+
+        // Check if appointment is within allowed hours (10 AM to 5 PM)
+        if ($appointmentHour < 10 || $appointmentHour >= 17) {
+            return redirect()->back()
+                ->with('error', 'Appointments are only available between 10 AM and 5 PM.')
+                ->withInput();
+        }
+
+        // Check if appointment is within the 3-month limit
+        if ($appointmentDateTime->gt($maxDate)) {
+            return redirect()->back()
+                ->with('error', 'Appointments can only be booked up to ' . $maxDate->format('F Y') . '.')
+                ->withInput();
+        }
+
+        // Check for existing appointment
+        $existingAppointment = Appointment::where('doctor_id', $request->doctor_id)
+            ->where('date_time', $appointmentDateTime)
+            ->whereNotIn('status', ['cancelled'])
+            ->first();
+
+        if ($existingAppointment) {
+            return redirect()->back()
+                ->with('error', 'This time slot is already booked with this doctor. Please select a different time.')
+                ->withInput();
+        }
+
         // Check if doctor is unavailable on this date
-        $appointmentDate = Carbon::parse($request->date_time)->format('Y-m-d');
+        $appointmentDate = $appointmentDateTime->format('Y-m-d');
         $isUnavailable = DoctorUnavailability::where('doctor_id', $request->doctor_id)
             ->whereDate('date', $appointmentDate)
             ->exists();
@@ -118,11 +148,12 @@ class PatientController extends Controller
                 ->withInput();
         }
 
+        // Create the appointment
         $appointment = new Appointment([
             'appointment_id' => (string) Str::uuid(),
             'patient_id' => auth()->id(),
             'doctor_id' => $request->doctor_id,
-            'date_time' => $request->date_time,
+            'date_time' => $appointmentDateTime,
             'message' => $request->message,
             'status' => 'pending'
         ]);

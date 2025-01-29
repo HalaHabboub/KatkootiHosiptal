@@ -8,6 +8,7 @@ use App\Models\DoctorUnavailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class DoctorController extends Controller
 {

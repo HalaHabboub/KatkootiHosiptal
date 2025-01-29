@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -46,18 +47,30 @@ class AdminController extends Controller
             'phone' => 'required|string',
             'password' => 'required|min:6',
             'specialization' => 'nullable|string',
-            'qualification' => 'nullable|string'
+            'qualification' => 'nullable|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
-        $validated['status'] = 'active';
-        $validated['specialization'] = $request->specialization ?? 'General';
-        $validated['qualification'] = $request->qualification ?? 'MBBS'; // Default qualification
+        try {
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $imagePath = public_path('images/doctors/' . $imageName);
+                $image->move(public_path('images/doctors'), $imageName);
+                $validated['image'] = '/images/doctors/' . $imageName;
+            }
 
-        Doctor::create($validated);
+            $validated['password'] = Hash::make($validated['password']);
+            $validated['status'] = 'active';
+            $validated['specialization'] = $request->specialization ?? 'General';
+            $validated['qualification'] = $request->qualification ?? 'MBBS';
 
-        return redirect()->route('admin.doctors.manage')
-            ->with('success', 'Doctor added successfully');
+            Doctor::create($validated);
+            return redirect()->route('admin.doctors.manage')->with('success', 'Doctor added successfully');
+        } catch (\Exception $e) {
+            \Log::error('Error storing doctor: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error storing doctor: ' . $e->getMessage());
+        }
     }
 
     public function deleteDoctor(Doctor $doctor)
@@ -75,12 +88,43 @@ class AdminController extends Controller
             'department_id' => 'required|exists:departments,department_id',
             'phone' => 'required|string',
             'specialization' => 'nullable|string',
-            'qualification' => 'nullable|string'
+            'qualification' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        $doctor->update($validated);
+        try {
+            // Start with existing doctor data
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'department_id' => $validated['department_id'],
+                'phone' => $validated['phone'],
+                'specialization' => $validated['specialization'],
+                'qualification' => $validated['qualification']
+            ];
 
-        return redirect()->route('admin.doctors.manage')
-            ->with('success', 'Doctor updated successfully');
+            // Handle image upload if present
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($doctor->image && file_exists(public_path($doctor->image))) {
+                    unlink(public_path($doctor->image));
+                }
+
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('images/doctors'), $imageName);
+                $updateData['image'] = '/images/doctors/' . $imageName;
+            }
+
+            // Update the doctor record
+            $doctor->update($updateData);
+
+            return redirect()->route('admin.doctors.manage')
+                ->with('success', 'Doctor updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Error updating doctor: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Error updating doctor: ' . $e->getMessage());
+        }
     }
 }

@@ -17,7 +17,8 @@ class Doctor extends Authenticatable
         'specialization',
         'qualification',
         'status',
-        'department_id' // Add department_id to fillable
+        'department_id',
+        'image',
     ];
 
     public function appointments()

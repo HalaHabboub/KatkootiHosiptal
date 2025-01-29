@@ -52,7 +52,7 @@
                     <div class="col-md-6 col-lg-4 py-3 wow zoomIn">
                         <div class="card-doctor">
                             <div class="header">
-                                <img src="{{ asset('storage/' . $doctor->image) }}" alt="Doctor {{ $doctor->name }}">
+                                <img src="{{ asset($doctor->image) }}" alt="Doctor {{ $doctor->name }}">
                                 <div class="meta">
                                     <a href="#" onclick="alert('Phone: {{ $doctor->phone }}')" title="{{ $doctor->phone }}">
                                         <span class="mai-call"></span>
