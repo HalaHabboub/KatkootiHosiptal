@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Doctor Schedule')
 
 @section('content')
 <x-doctorNavbar />

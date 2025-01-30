@@ -4,6 +4,7 @@
 
 @section('content')
 @include('components.patientNavbar')
+ <!-- Landing page -->
 
 <!-- Hero Section -->
 <div class="page-hero bg-image overlay-dark" style="background-image: url({{ asset('assets/img/bg_image_1.jpg') }});">
